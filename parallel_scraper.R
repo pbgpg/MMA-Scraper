@@ -2,8 +2,8 @@ if (!require("foreach")) install.packages("foreach")
 library(foreach)
 if (!require("doSNOW")) install.packages("doSNOW")
 library(doSNOW)
-
-
+if (!require("parallel")) install.packages("parallel")
+library(parallel)
 
 
 # Start our search with Chael P. Sonnen. Can replace this with ANY fighter's Sherdog link.
@@ -159,12 +159,15 @@ scrapeAll <- function (iterations) {
   fights_table$searched <<- fights_table$searched[-1,]
 }
 
-cl <- makeCluster(7, outfile="log.txt")
+NumberOfCluster <- detectCores()
+cl <- makeCluster(NumberOfCluster, outfile="log.txt")
 registerDoSNOW(cl)
 # Will run until all fighters to scrape are exausted.
 # Should take about 2 seconds for first iteration, 10 seconds for second, 2 minutes for third, to upwards of 1.5 hours for some iterations. Should only be about 25 iterations.
+# Script may stop from timing out. You can simply resume from where you left off.
 while(length(fights_table$toSearch > 1)) {
   scrapeAll(1)
 }
 stopCluster(cl)
+rm(NumberOfCluster)
 
